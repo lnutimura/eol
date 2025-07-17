@@ -1,0 +1,189 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/lutimura/eol/internal"
+	"github.com/spf13/cobra"
+)
+
+type cmdProduct struct{}
+
+func (c *cmdProduct) Command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = "product"
+	cmd.Short = "Query for all products"
+	cmd.Long = "Query for all products referenced on endoflife.date"
+
+	productGetCmd := cmdProductGet{}
+	cmd.AddCommand(productGetCmd.Command())
+
+	productListCmd := cmdProductList{}
+	cmd.AddCommand(productListCmd.Command())
+
+	// Workaround for subcommand usage errors. See: https://github.com/spf13/cobra/issues/706
+	cmd.Args = cobra.NoArgs
+	cmd.Run = func(cmd *cobra.Command, _ []string) { _ = cmd.Usage() }
+
+	return cmd
+}
+
+type ProductListItem struct {
+	Name     string   `json:"name"`
+	Aliases  []string `json:"aliases"`
+	Label    string   `json:"label"`
+	Category string   `json:"category"`
+	Tags     []string `json:"tags"`
+	URI      string   `json:"uri"`
+}
+
+type ProductListResponse struct {
+	SchemaVersion string            `json:"schema_version"`
+	GeneratedAt   string            `json:"generated_at"`
+	Total         int               `json:"total"`
+	Result        []ProductListItem `json:"result"`
+}
+type cmdProductList struct {
+	flagAllColumns bool
+	flagColumns    []string
+
+	flagCategory []string
+	flagName     []string
+	flagTag      []string
+}
+
+func (c *cmdProductList) Command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = "list"
+	cmd.Short = "List all products"
+	cmd.Long = "List all the products referenced on endoflife.date"
+
+	cmd.Flags().BoolVarP(&c.flagAllColumns, "all", "a", false, "Display all columns")
+	cmd.Flags().StringSliceVarP(&c.flagColumns, "columns", "c", nil, "Comma-separated list of columns to display")
+
+	cmd.Flags().StringSliceVar(&c.flagCategory, "category", nil, "Filter by category")
+	cmd.Flags().StringSliceVar(&c.flagName, "name", nil, "Filter by name")
+	cmd.Flags().StringSliceVar(&c.flagTag, "tag", nil, "Filter by tag")
+
+	cmd.Run = c.Run
+
+	return cmd
+}
+
+func (c *cmdProductList) Run(cmd *cobra.Command, args []string) {
+	url := fmt.Sprintf("%s/products", EndOfLifeURL)
+
+	var response ProductListResponse
+	if err := internal.FetchJSON(url, &response); err != nil {
+		os.Exit(1)
+	}
+	columns := internal.ParseColumns[ProductListItem](
+		c.flagAllColumns,
+		c.flagColumns,
+		[]string{"Name"},
+	)
+	items := c.filterProducts(response.Result)
+	internal.RenderTable(items, columns)
+}
+
+func (c *cmdProductList) filterProducts(products []ProductListItem) []ProductListItem {
+	var result []ProductListItem
+
+	for _, product := range products {
+		if !internal.MatchesAny(product.Category, c.flagCategory) {
+			continue
+		}
+
+		if !internal.MatchesAny(product.Name, c.flagName) {
+			continue
+		}
+
+		if !internal.HasOverlap(product.Tags, c.flagTag) {
+			continue
+		}
+
+		result = append(result, product)
+	}
+	return result
+}
+
+type ProductGetResponse struct {
+	SchemaVersion string    `json:"schema_version"`
+	GeneratedAt   time.Time `json:"generated_at"`
+	LastModified  time.Time `json:"last_modified"`
+	Result        Product   `json:"result"`
+}
+
+type Product struct {
+	Name           string               `json:"name"`
+	Aliases        []string             `json:"aliases"`
+	Label          string               `json:"label"`
+	Category       string               `json:"category"`
+	Tags           []string             `json:"tags"`
+	VersionCommand string               `json:"versionCommand"`
+	Identifiers    []interface{}        `json:"identifiers"`
+	Labels         ProductSupportLabels `json:"labels"`
+	Links          ProductLinks         `json:"links"`
+	Releases       []ProductRelease     `json:"releases"`
+}
+
+type ProductSupportLabels struct {
+	Eoas         string `json:"eoas"`
+	Discontinued string `json:"discontinued"`
+	Eol          string `json:"eol"`
+	Eoes         string `json:"eoes"`
+}
+
+type ProductLinks struct {
+	Icon          string `json:"icon"`
+	HTML          string `json:"html"`
+	ReleasePolicy string `json:"releasePolicy"`
+}
+
+type ProductRelease struct {
+	Name         string               `json:"name"`
+	Codename     string               `json:"codename"`
+	Label        string               `json:"label"`
+	ReleaseDate  string               `json:"releaseDate"`
+	IsLts        bool                 `json:"isLts"`
+	LtsFrom      string               `json:"ltsFrom"`
+	IsEol        bool                 `json:"isEol"`
+	EolFrom      string               `json:"eolFrom"`
+	IsEoes       bool                 `json:"isEoes"`
+	EoesFrom     string               `json:"eoesFrom"`
+	IsMaintained bool                 `json:"isMaintained"`
+	Latest       ProductLatestRelease `json:"latest"`
+}
+
+type ProductLatestRelease struct {
+	Name string `json:"name"`
+	Date string `json:"date"`
+	Link string `json:"link"`
+}
+
+type cmdProductGet struct{}
+
+func (c *cmdProductGet) Command() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.Use = "get"
+	cmd.Short = "Get a product"
+	cmd.Long = "Get the given product data."
+	cmd.Args = cobra.ExactArgs(1)
+	cmd.Run = c.Run
+
+	return cmd
+}
+
+func (c *cmdProductGet) Run(cmd *cobra.Command, args []string) {
+	url := fmt.Sprintf("%s/products/%s", EndOfLifeURL, args[0])
+
+	var response ProductGetResponse
+	if err := internal.FetchJSON(url, &response); err != nil {
+		os.Exit(1)
+	}
+
+	internal.RenderTable(response.Result.Releases, []string{"codename"})
+
+}
