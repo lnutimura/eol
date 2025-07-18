@@ -49,9 +49,7 @@ type cmdProductList struct {
 	flagAllColumns bool
 	flagColumns    []string
 
-	flagCategory []string
-	flagName     []string
-	flagTag      []string
+	flagCategory string
 }
 
 func (c *cmdProductList) Command() *cobra.Command {
@@ -63,9 +61,7 @@ func (c *cmdProductList) Command() *cobra.Command {
 	cmd.Flags().BoolVarP(&c.flagAllColumns, "all", "a", false, "Display all columns")
 	cmd.Flags().StringSliceVarP(&c.flagColumns, "columns", "c", nil, "Comma-separated list of columns to display")
 
-	cmd.Flags().StringSliceVar(&c.flagCategory, "category", nil, "Filter by category")
-	cmd.Flags().StringSliceVar(&c.flagName, "name", nil, "Filter by name")
-	cmd.Flags().StringSliceVar(&c.flagTag, "tag", nil, "Filter by tag")
+	cmd.Flags().StringVar(&c.flagCategory, "category", "", "Filter by category")
 
 	cmd.Run = c.Run
 
@@ -74,6 +70,9 @@ func (c *cmdProductList) Command() *cobra.Command {
 
 func (c *cmdProductList) Run(cmd *cobra.Command, args []string) {
 	url := fmt.Sprintf("%s/products", EndOfLifeURL)
+	if c.flagCategory != "" {
+		url = fmt.Sprintf("%s/categories/%s", EndOfLifeURL, c.flagCategory)
+	}
 
 	var response ProductListResponse
 	if err := internal.FetchJSON(url, &response); err != nil {
@@ -84,29 +83,7 @@ func (c *cmdProductList) Run(cmd *cobra.Command, args []string) {
 		c.flagColumns,
 		[]string{"Name"},
 	)
-	items := c.filterProducts(response.Result)
-	internal.RenderTable(items, columns)
-}
-
-func (c *cmdProductList) filterProducts(products []ProductListItem) []ProductListItem {
-	var result []ProductListItem
-
-	for _, product := range products {
-		if !internal.MatchesAny(product.Category, c.flagCategory) {
-			continue
-		}
-
-		if !internal.MatchesAny(product.Name, c.flagName) {
-			continue
-		}
-
-		if !internal.HasOverlap(product.Tags, c.flagTag) {
-			continue
-		}
-
-		result = append(result, product)
-	}
-	return result
+	internal.RenderTable(response.Result, columns)
 }
 
 type ProductGetResponse struct {
