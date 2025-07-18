@@ -17,6 +17,10 @@ func createApp() *cobra.Command {
 	productCmd := cmdProduct{}
 	app.AddCommand(productCmd.Command())
 
+	// category sub-command
+	categoryCmd := cmdCategory{}
+	app.AddCommand(categoryCmd.Command())
+
 	return app
 }
 
