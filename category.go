@@ -66,6 +66,7 @@ func (c *cmdCategoryList) Run(cmd *cobra.Command, args []string) {
 
 	var response CategoryListResponse
 	if err := internal.FetchJSON(url, &response); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 	columns := internal.ParseColumns[CategoryListItem](

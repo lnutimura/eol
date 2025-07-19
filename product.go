@@ -76,6 +76,7 @@ func (c *cmdProductList) Run(cmd *cobra.Command, args []string) {
 
 	var response ProductListResponse
 	if err := internal.FetchJSON(url, &response); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 	columns := internal.ParseColumns[ProductListItem](
@@ -100,7 +101,7 @@ type Product struct {
 	Category       string               `json:"category"`
 	Tags           []string             `json:"tags"`
 	VersionCommand string               `json:"versionCommand"`
-	Identifiers    []interface{}        `json:"identifiers"`
+	Identifiers    []any                `json:"identifiers"`
 	Labels         ProductSupportLabels `json:"labels"`
 	Links          ProductLinks         `json:"links"`
 	Releases       []ProductRelease     `json:"releases"`
@@ -140,7 +141,10 @@ type ProductLatestRelease struct {
 	Link string `json:"link"`
 }
 
-type cmdProductGet struct{}
+type cmdProductGet struct {
+	flagAllColumns bool
+	flagColumns    []string
+}
 
 func (c *cmdProductGet) Command() *cobra.Command {
 	cmd := &cobra.Command{}
@@ -148,6 +152,10 @@ func (c *cmdProductGet) Command() *cobra.Command {
 	cmd.Short = "Get a product"
 	cmd.Long = "Get the given product data."
 	cmd.Args = cobra.ExactArgs(1)
+
+	cmd.Flags().BoolVarP(&c.flagAllColumns, "all", "a", false, "Display all columns")
+	cmd.Flags().StringSliceVarP(&c.flagColumns, "columns", "c", nil, "Comma-separated list of columns to display")
+
 	cmd.Run = c.Run
 
 	return cmd
@@ -158,9 +166,15 @@ func (c *cmdProductGet) Run(cmd *cobra.Command, args []string) {
 
 	var response ProductGetResponse
 	if err := internal.FetchJSON(url, &response); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 
-	internal.RenderTable(response.Result.Releases, []string{"codename"})
+	columns := internal.ParseColumns[ProductRelease](
+		c.flagAllColumns,
+		c.flagColumns,
+		[]string{"Name", "Label", "ReleaseDate", "EolFrom", "EoesFrom"},
+	)
 
+	internal.RenderTable(response.Result.Releases, columns)
 }

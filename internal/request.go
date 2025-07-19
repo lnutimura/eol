@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func FetchJSON(url string, target interface{}) error {
+func FetchJSON(url string, target any) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Could not connect to %s: %v", url, err)
