@@ -93,14 +93,10 @@ eol category list [flags]
 - `-c`, `--columns`  
   Comma-separated list of columns to display.
 
-- `--name`  
-  Filter categories by name.
-
 **Example:**
 
 ```bash
 eol category list
-eol category list --name linux
 eol category list -a
 eol category list -c Name,URI
 ```

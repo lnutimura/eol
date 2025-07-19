@@ -54,8 +54,6 @@ func (c *cmdCategoryList) Command() *cobra.Command {
 	cmd.Flags().BoolVarP(&c.flagAllColumns, "all", "a", false, "Display all columns")
 	cmd.Flags().StringSliceVarP(&c.flagColumns, "columns", "c", nil, "Comma-separated list of columns to display")
 
-	cmd.Flags().StringSliceVar(&c.flagName, "name", nil, "Filter by name")
-
 	cmd.Run = c.Run
 
 	return cmd
@@ -74,19 +72,5 @@ func (c *cmdCategoryList) Run(cmd *cobra.Command, args []string) {
 		c.flagColumns,
 		[]string{"Name"},
 	)
-	items := c.filterCategories(response.Result)
-	internal.RenderTable(items, columns)
-}
-
-func (c *cmdCategoryList) filterCategories(categories []CategoryListItem) []CategoryListItem {
-	var result []CategoryListItem
-
-	for _, category := range categories {
-		if !internal.MatchesAny(category.Name, c.flagName) {
-			continue
-		}
-
-		result = append(result, category)
-	}
-	return result
+	internal.RenderTable(response.Result, columns)
 }
