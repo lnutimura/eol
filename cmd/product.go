@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -69,9 +69,9 @@ func (c *cmdProductList) Command() *cobra.Command {
 }
 
 func (c *cmdProductList) Run(cmd *cobra.Command, args []string) {
-	url := fmt.Sprintf("%s/products", EndOfLifeURL)
+	url := fmt.Sprintf("%s/products", internal.EndOfLifeURL)
 	if c.flagCategory != "" {
-		url = fmt.Sprintf("%s/categories/%s", EndOfLifeURL, c.flagCategory)
+		url = fmt.Sprintf("%s/categories/%s", internal.EndOfLifeURL, c.flagCategory)
 	}
 
 	var response ProductListResponse
@@ -162,7 +162,7 @@ func (c *cmdProductGet) Command() *cobra.Command {
 }
 
 func (c *cmdProductGet) Run(cmd *cobra.Command, args []string) {
-	url := fmt.Sprintf("%s/products/%s", EndOfLifeURL, args[0])
+	url := fmt.Sprintf("%s/products/%s", internal.EndOfLifeURL, args[0])
 
 	var response ProductGetResponse
 	if err := internal.FetchJSON(url, &response); err != nil {

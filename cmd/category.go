@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -62,7 +62,7 @@ func (c *cmdCategoryList) Command() *cobra.Command {
 }
 
 func (c *cmdCategoryList) Run(cmd *cobra.Command, args []string) {
-	url := fmt.Sprintf("%s/categories", EndOfLifeURL)
+	url := fmt.Sprintf("%s/categories", internal.EndOfLifeURL)
 
 	var response CategoryListResponse
 	if err := internal.FetchJSON(url, &response); err != nil {
