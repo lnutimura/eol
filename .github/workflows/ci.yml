@@ -21,3 +21,9 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: latest
+      - name: GoReleaser check
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: check --verbose

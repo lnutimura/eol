@@ -6,9 +6,24 @@ API so you can check support lifecycles from the terminal.
 
 ## Install
 
+Download a prebuilt binary for Linux, macOS, or Windows from
+[Releases](https://github.com/lnutimura/eol/releases/latest).
+Archives are named `eol_<version>_<os>_<arch>` (`.tar.gz`, or `.zip` on
+Windows). Unpack and put `eol` on your `PATH`:
+
+```bash
+tar -xzf eol_*_linux_amd64.tar.gz
+sudo mv eol /usr/local/bin/
+eol --version
+```
+
+With Go installed:
+
 ```bash
 go install github.com/lnutimura/eol@latest
 ```
+
+Tagged `v*` pushes publish new archives via GoReleaser.
 
 ## Global flags
 
