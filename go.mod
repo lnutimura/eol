@@ -1,6 +1,6 @@
 module github.com/lnutimura/eol
 
-go 1.25
+go 1.27.4
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0

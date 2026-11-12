@@ -44,7 +44,7 @@ sudo mv eol /usr/local/bin/
 eol --version
 ```
 
-With Go 1.25 or later:
+With Go 1.27.4 or later:
 
 ```bash
 go install github.com/lnutimura/eol@latest
