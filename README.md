@@ -9,6 +9,11 @@ A command-line client for [endoflife.date](https://endoflife.date) support lifec
 `eol` looks up when a product, OS, or runtime stops receiving updates, right from
 the terminal. Data comes from the public endoflife.date API.
 
+<p align="center">
+  <img src="docs/screenshots/product.png" width="800"
+       alt="eol product get go: product details and a release table with supported cycles in green and end-of-life cycles in red">
+</p>
+
 ## Quick start
 
 ```bash
@@ -72,6 +77,10 @@ eol check ubuntu
 eol check ubuntu@18.04   # exit 2 — end-of-life (eol from 2023-05-31)
 ```
 
+<img src="docs/screenshots/check.png" width="640"
+     alt="eol check ubuntu@24.04 exits 0 as maintained; eol check nodejs@20 exits 2 as end-of-life">
+
+
 ### Inspect a product
 
 `product get` prints labels, links, and identifiers, then the releases table.
@@ -93,6 +102,10 @@ eol product list --category os -o csv
 eol product list -o json | jq '.[0].name'
 eol release latest nodejs --meta -o json
 ```
+
+<img src="docs/screenshots/json.png" width="680"
+     alt="eol release latest nodejs -o json piped to jq, selecting name, eolFrom and the latest patch version">
+
 
 ## Flags
 
