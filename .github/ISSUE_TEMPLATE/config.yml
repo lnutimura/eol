@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Wrong or missing lifecycle data
+    url: https://github.com/endoflife-date/endoflife.date/issues/new/choose
+    about: Dates, versions, labels and products come from endoflife.date. Fix them there and eol picks them up.
+  - name: endoflife.date API documentation
+    url: https://endoflife.date/docs/api/v1/
+    about: What each endpoint and field means.

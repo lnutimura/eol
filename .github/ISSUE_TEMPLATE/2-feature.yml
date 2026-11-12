@@ -1,0 +1,47 @@
+# Filing through the API or `gh issue create`? Forms only apply on the web:
+# write the body with each field's label below as a `### ` heading, in order.
+name: Feature
+description: A new command, flag, column, output format or completion.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        eol is a thin client for the endoflife.date API: it reads lifecycle
+        data and formats it. It can only show fields the API returns; new
+        products or fields are requests for
+        [endoflife.date](https://github.com/endoflife-date/endoflife.date/issues/new/choose).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What you're trying to do, and where it happens (a terminal, a CI job, a script).
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The command or flags you'd like, and sample output.
+      placeholder: |
+        eol check ubuntu@20.04 --warn-within 90d
+        ubuntu 20.04 reaches end-of-life in 42 days (eol from 2025-05-31)
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How you do it today, for example `-o json | jq ...`.
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility
+      description: Scripts rely on exit codes (0 supported, 1 error, 2 end-of-life) and on JSON/CSV output.
+      options:
+        - Additive (new command, flag or opt-in column)
+        - Changes existing output or exit codes
+        - Not sure
+    validations:
+      required: true

@@ -1,0 +1,58 @@
+# Filing through the API or `gh issue create`? Forms only apply on the web:
+# write the body with each field's label below as a `### ` heading, in order.
+name: Bug
+description: A crash, an error, a wrong exit code, or output that doesn't match the API response.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        eol shows what the [endoflife.date API](https://endoflife.date/docs/api/v1/)
+        returns. If a date, version or label is wrong on
+        [endoflife.date](https://endoflife.date) too, report it
+        [upstream](https://github.com/endoflife-date/endoflife.date/issues/new/choose)
+        instead.
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran, with every flag.
+      placeholder: eol check ubuntu@22.04.1 -o json
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: What eol printed, and the exit code (`echo $?` right after). Use `--color never` so the text is plain.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What you expected instead, and why (a link to the product's endoflife.date page or API URL helps).
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        `eol --version`, the OS and architecture, the shell or CI runner, and
+        how you installed eol (release archive, or `go install` at which
+        version: those builds print `dev`).
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I can reproduce it on the latest release.
+          required: true
+        - label: It still happens with `--no-cache`.
+        - label: The data on endoflife.date is correct; only eol gets it wrong.
